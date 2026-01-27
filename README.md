@@ -40,9 +40,5 @@ python -m uvicorn server.server:app --host 0.0.0.0 --port 8001
 - Formats them into Markdown with timestamps and separators.
 - Returns the formatted content in `clean_text`.
 
-## Common issues
-- **Port in use**: run on 8001 (see above).
-- **CORS**: server allows all origins to support the extension.
-
 ## Contributing
 If you’re new to Git or GitHub, see `AGENTS.md` for a guided workflow and explanations.
