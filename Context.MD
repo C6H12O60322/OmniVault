@@ -13,3 +13,4 @@
 - Created branch `feature/claude-support` for the Claude support work.
 - Will commit Claude support + PDF proxy + font fixes changes (including `chat_export.pdf`) under a single feature commit.
 - Pushed branch `feature/claude-support` to GitHub after enabling network access.
+- Added `TODO.md` to track the Claude PDF download CSP fix and test checklist.
