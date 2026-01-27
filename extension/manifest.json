@@ -20,6 +20,10 @@
     {
       "matches": ["https://gemini.google.com/*"],
       "js": ["content_gemini.js"]
+    },
+    {
+      "matches": ["https://claude.ai/*"],  
+      "js": ["content_claude.js"]
     }
   ],
   "action": {

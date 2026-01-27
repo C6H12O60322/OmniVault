@@ -1,11 +1,64 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <style>body { width: 200px; padding: 10px; font-family: sans-serif; }</style>
-  </head>
-  <body>
-    <h3>OmniVault</h3>
-    <button id="transferBtn">Transfer Chat</button>
+<head>
+    <meta charset="UTF-8">
+
+    <style>
+        body { width: 320px; padding: 15px; font-family: 'Segoe UI', sans-serif; }
+        h2 { text-align: center; color: #333; margin-bottom: 20px; }
+        
+        .control-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
+        select { 
+            width: 100%; 
+            padding: 8px; 
+            border-radius: 5px; 
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        button:hover { background-color: #45a049; }
+        
+        /* Secondary button for PDF */
+        #pdfBtn { background-color: #2196F3; margin-top: 10px; }
+        #pdfBtn:hover { background-color: #0b7dda; }
+    </style>
+</head>
+<body>
+    <h2>OmniVault 🛡️</h2>
+
+    <div class="control-group">
+        <label>Export From:</label>
+        <select id="sourceModel">
+            <option value="chatgpt">ChatGPT</option>
+            <option value="gemini">Gemini</option>
+            <option value="claude">Claude</option> </select>
+        </select>
+    </div>
+
+    <div class="control-group">
+        <label>Import To:</label>
+        <select id="destModel">
+            <option value="gemini">Gemini</option>
+            <option value="chatgpt">ChatGPT</option>
+            <option value="claude">Claude</option> </select>
+        </select>
+    </div>
+
+    <button id="transferBtn">Transfer Chat 🚀</button>
+    <button id="pdfBtn">Download PDF 📄</button>
+
     <script src="popup.js"></script>
-  </body>
+</body>
 </html>
