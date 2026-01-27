@@ -7,6 +7,12 @@ This file tells coding agents how to work in this repo. Follow it exactly.
 - Hold the user’s hand: explain what you’re doing and why.
 - Always update `Context.MD` when you make changes, run commands, or learn new facts.
 - Prefer small, safe steps with clear check-ins.
+- Ask before touching credentials or signing in anywhere.
+
+## Safe operations
+- Before any potentially destructive action (delete, reset, overwrite), ask for explicit approval.
+- If a command requires admin/UAC, explain why and get confirmation.
+- Never store secrets in the repo. Use environment variables or local config.
 
 ## When you make changes
 1) Describe what you plan to change in plain English.
@@ -26,12 +32,19 @@ This file tells coding agents how to work in this repo. Follow it exactly.
 - For new work: create a branch `feature/<short-name>` or `fix/<short-name>`.
 - Keep branches focused on one task.
 - After finishing, suggest merging or opening a PR (even if user won’t do it yet).
+- Explain to the user when staying on `main` is OK (tiny changes) vs when a branch is safer.
 
 ## Basic repo usage (explain commands)
 - `git status`: shows what changed.
 - `git add`: stages changes.
 - `git commit`: saves a snapshot.
 - `git push`: uploads to GitHub.
+
+## App setup and builds (guide the user)
+- Always document prerequisites (Python version, Node, pip/npm, etc.).
+- Show how to install dependencies before running.
+- If a build or run fails, explain the error and the next step.
+- Offer to create or update `requirements.txt`/`package.json` when missing.
 
 ## Project overview (for agents)
 - FastAPI server in `server/server.py`.

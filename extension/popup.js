@@ -1,17 +1,44 @@
-/*document.getElementById('transferBtn').addEventListener('click', async () => {
-  // 1. Get the current active tab
-  let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+document.getElementById("transferBtn").addEventListener("click", () => {
+    const source = document.getElementById("sourceModel").value;
+    const dest = document.getElementById("destModel").value;
 
-  // 2. Send a message to the script running inside ChatGPT
-  chrome.tabs.sendMessage(tab.id, { action: "scrape" }, (response) => {
-    if (response && response.status === "success") {
-      alert("Success! Data sent to Python Brain.");
-    } else {
-      alert("Error: Are you on a ChatGPT page?");
+    console.log(`Plan: Transfer from ${source} to ${dest}`);
+
+    // Safety Check: Don't transfer to the same place
+    if (source === dest) {
+        alert("Please choose a different Destination than the Source!");
+        return;
     }
-  });
+
+    // 1. Identify the Source Tab
+    let queryUrl = "";
+    if (source === "chatgpt") queryUrl = "https://chatgpt.com/*";
+    if (source === "gemini") queryUrl = "https://gemini.google.com/*";
+    if (source === "claude") queryUrl = "https://claude.ai/*"; // NEW
+
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        // Check if user is actually ON the source website
+        // (Simple check, mostly relies on user being on the right tab)
+        
+        // 2. Tell the Content Script to Scrape
+        chrome.tabs.sendMessage(tabs[0].id, { 
+            action: "scrape",
+            source: source,
+            destination: dest 
+        });
+    });
 });
-*/
+
+document.getElementById("pdfBtn").addEventListener("click", () => {
+    // Current simple PDF logic (assumes you are on the source tab)
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        chrome.tabs.sendMessage(tabs[0].id, { action: "download_pdf" });
+    });
+});
+
+
+
+/* v2 01/26/26 
 document.getElementById('transferBtn').addEventListener('click', async () => {
   // Get the current tab
   let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -32,3 +59,4 @@ document.getElementById('transferBtn').addEventListener('click', async () => {
     }
   });
 });
+*/

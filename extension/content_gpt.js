@@ -131,11 +131,23 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       
       // --- NEW CODE STARTS HERE ---
       // 3. Save the clean text to Chrome Storage
+      // REPLACEMENT CODE
       chrome.storage.local.set({ 'pending_transfer': data.clean_text }, () => {
-        console.log("Data saved to storage. Opening Gemini...");
-        
-        // 4. Tell background.js to open Gemini
-        chrome.runtime.sendMessage({ action: "open_gemini" });
+          console.log(`Data saved. Opening ${request.destination}...`);
+          
+          // Check the destination button the user actually clicked
+          if (request.destination === "gemini") {
+              chrome.runtime.sendMessage({ action: "open_gemini" });
+          }
+          
+          if (request.destination === "claude") {
+              chrome.runtime.sendMessage({ action: "open_claude" });
+          }
+          
+          // (Optional) If you ever want to export GPT -> GPT
+          if (request.destination === "chatgpt") {
+              chrome.runtime.sendMessage({ action: "open_chatgpt" });
+          }
       });
       // --- NEW CODE ENDS HERE ---
 
@@ -148,5 +160,90 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 // ...
     return true; // Keeps the message channel open for the async fetch
+  }
+});
+
+// ... (Keep your existing Scraper logic at the top) ...
+
+// --- PASTE LOGIC (New!) ---
+console.log("OmniVault: ChatGPT Paster Loaded!");
+
+window.addEventListener('load', () => {
+  // Wait for ChatGPT to fully load
+  setTimeout(checkAndPasteGPT, 2000); 
+});
+
+function checkAndPasteGPT() {
+  chrome.storage.local.get(['pending_transfer'], (result) => {
+    if (result.pending_transfer) {
+      console.log("Found data for ChatGPT! Pasting...");
+      pasteToChatGPT(result.pending_transfer);
+      chrome.storage.local.remove(['pending_transfer']);
+    }
+  });
+}
+
+function pasteToChatGPT(text) {
+  // 1. Find the Input Box (ProseMirror div)
+  const inputField = document.querySelector('#prompt-textarea');
+
+  if (inputField) {
+    inputField.focus();
+    document.execCommand('insertText', false, text);
+
+    // 2. Click Send (Wait for button to activate)
+    setTimeout(() => {
+      const sendButton = document.querySelector('[data-testid="send-button"]');
+      if (sendButton) {
+        console.log("Clicking Send...");
+        sendButton.click();
+      }
+    }, 500);
+  } else {
+    console.log("Could not find ChatGPT input box.");
+  }
+}
+
+// --- PDF DOWNLOAD LISTENER (Add to bottom of content_gpt.js) ---
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === "download_pdf") {
+    console.log("PDF Download requested for ChatGPT...");
+
+    // 1. RE-USE SCRAPER LOGIC
+    // (We use the same logic as the transfer feature)
+    let rows = document.querySelectorAll('[data-testid^="conversation-turn-"]');
+    let chatData = [];
+
+    rows.forEach((row, index) => {
+      let isUser = row.querySelector('[data-testid="user-message"]');
+      let isAI = row.querySelector('[data-testid="assistant-message"]');
+      let role = isUser ? "User" : (isAI ? "ChatGPT" : (index % 2 === 0 ? "User" : "ChatGPT"));
+      
+      let textDiv = row.querySelector('.markdown') || row.querySelector('.text-message');
+      if (textDiv) {
+        chatData.push({ role: role, content: textDiv.innerText });
+      }
+    });
+
+    // 2. SEND TO SERVER & DOWNLOAD FILE
+    fetch('http://localhost:8000/download-pdf', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: chatData })
+    })
+    .then(response => response.blob()) // <--- Important: Expect a binary file, not JSON
+    .then(blob => {
+      // 3. Create a fake link to trigger download
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = 'OmniVault_ChatGPT_Export.pdf'; // The filename you will see
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      console.log("PDF Downloaded!");
+    })
+    .catch(err => console.error("PDF Error:", err));
   }
 });
