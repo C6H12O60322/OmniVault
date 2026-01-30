@@ -11,7 +11,7 @@ Problem: Short chat transfers (e.g., ~14 lines) take ~1 minute because the exten
 - [x] Hot-swap: switch to existing tab and send `paste_trigger` immediately (no force reload).
 - [x] Robust waits: replace fixed timers with `waitForElement` (poll every 500ms up to 10s).
 - [x] Instant paste: listen for `paste_trigger` in all content scripts.
-- [x] Self-healing: if the input box is missing after 10s, auto-reload once.
+- [ ] Self-healing: if the input box is missing after 10s, auto-reload once.
 
 ### Remaining Ideas
 - [ ] Replace `document.execCommand('insertText')` with `navigator.clipboard.writeText()` for faster input.
