@@ -7,6 +7,8 @@
 - Added `.gitignore` to exclude `.venv/` and `.gitstore/`.
 - Created `AGENTS.md`, `Context.MD`, and `README.md`.
 - Expanded `AGENTS.md` with safety, setup/build guidance, and credential cautions.
+- Added new TODO sections for performance, rich content support, and smart UX auto-detect.
+- Committed and pushed TODO updates to GitHub.
 
 ## 2026-01-27
 - Ran `git status -sb` to review current changes before preparing a new commit.

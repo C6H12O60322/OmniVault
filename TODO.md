@@ -1,5 +1,41 @@
 # TODO
 
+## Performance Optimization (Latency)
+
+Status: Open  
+Priority: High
+
+Problem: Short chat transfers (e.g., ~14 lines) take ~1 minute because the extension forces a hard reload of the destination tab and waits for the SPA to re-initialize.
+
+### Solutions
+- [ ] Update `extension/background.js` to avoid force reload when the destination tab is already idle/ready (focus and inject immediately).
+- [ ] Replace `document.execCommand('insertText')` with `navigator.clipboard.writeText()` for faster input.
+
+## Rich Content Support (Links & Graphs)
+
+Status: Open  
+Priority: Medium
+
+Problem: Current scraper uses `.innerText`, which ignores hidden HTML elements and drops links/graphs.
+
+### Solutions
+- [ ] In all `extension/content_*.js` files, extract `<a href>` anchors and format them as Markdown links `[text](url)`.
+- [ ] For graph widgets, scrape alt text or underlying data tables so LLMs can rebuild charts from raw data.
+
+## Smart UX (Auto-Detect Source)
+
+Status: Open  
+Priority: Medium
+
+Problem: Users must manually select the "Export From" model even when the active site is known.
+
+### Solutions
+- [ ] In `extension/popup.js`, read the active tab URL on init.
+- [ ] Auto-set the source dropdown:
+  - `chatgpt.com` → ChatGPT
+  - `gemini.google.com` → Gemini
+  - `claude.ai` → Claude
+
 ## Bug Fix: Fix PDF Download for Claude (CSP Error)
 
 Status: Open  
