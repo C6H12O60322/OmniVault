@@ -52,7 +52,7 @@ def process_chat(data: ChatData):
     return {"clean_text": formatted_text}
 
 
-
+"""
 # ... existing code ...
 import re
 
@@ -164,7 +164,7 @@ def download_pdf(data: ChatData):
     
     # 4. Return the file to the user
     return FileResponse(path=filename, filename=filename, media_type='application/pdf')
-"""
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

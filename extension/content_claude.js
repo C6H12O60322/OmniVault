@@ -101,3 +101,11 @@ function pasteToClaude(text) {
     }, 500);
   }
 }
+
+// --- NEW: Instant Paste Listener ---
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === "paste_trigger") {
+        console.log("Hot Swap detected! Pasting immediately...");
+        checkAndPasteClaude(); // Re-use your existing Claude paste function
+    }
+});

@@ -169,39 +169,74 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 console.log("OmniVault: ChatGPT Paster Loaded!");
 
 window.addEventListener('load', () => {
-  // Wait for ChatGPT to fully load
-  setTimeout(checkAndPasteGPT, 2000); 
+  checkAndPasteGPT();
 });
 
 function checkAndPasteGPT() {
   chrome.storage.local.get(['pending_transfer'], (result) => {
     if (result.pending_transfer) {
       console.log("Found data for ChatGPT! Pasting...");
-      pasteToChatGPT(result.pending_transfer);
-      chrome.storage.local.remove(['pending_transfer']);
+      pasteToChatGPT(result.pending_transfer).then((pasted) => {
+        if (pasted) {
+          chrome.storage.local.remove(['pending_transfer']);
+        }
+      });
     }
   });
 }
 
-function pasteToChatGPT(text) {
-  // 1. Find the Input Box (ProseMirror div)
-  const inputField = document.querySelector('#prompt-textarea');
-
-  if (inputField) {
-    inputField.focus();
-    document.execCommand('insertText', false, text);
-
-    // 2. Click Send (Wait for button to activate)
-    setTimeout(() => {
-      const sendButton = document.querySelector('[data-testid="send-button"]');
-      if (sendButton) {
-        console.log("Clicking Send...");
-        sendButton.click();
+function waitForElement(getElement, intervalMs = 500, timeoutMs = 10000) {
+  return new Promise((resolve) => {
+    const start = Date.now();
+    const timer = setInterval(() => {
+      const element = typeof getElement === "function" ? getElement() : document.querySelector(getElement);
+      if (element) {
+        clearInterval(timer);
+        resolve(element);
+        return;
       }
-    }, 500);
-  } else {
-    console.log("Could not find ChatGPT input box.");
+      if (Date.now() - start >= timeoutMs) {
+        clearInterval(timer);
+        resolve(null);
+      }
+    }, intervalMs);
+  });
+}
+
+function handleMissingInputOnce() {
+  const key = "omnivault_self_heal_input_reload";
+  if (!sessionStorage.getItem(key)) {
+    sessionStorage.setItem(key, "true");
+    console.log("Input box missing for 10s. Reloading page once...");
+    window.location.reload();
+    return;
   }
+  console.log("Input box still missing after a reload.");
+}
+
+async function pasteToChatGPT(text) {
+  const inputField = await waitForElement('#prompt-textarea');
+  if (!inputField) {
+    handleMissingInputOnce();
+    return false;
+  }
+
+  inputField.focus();
+  document.execCommand('insertText', false, text);
+
+  const sendButton = await waitForElement(() => {
+    const button = document.querySelector('[data-testid="send-button"]');
+    return button && !button.disabled ? button : null;
+  });
+
+  if (sendButton) {
+    console.log("Clicking Send...");
+    sendButton.click();
+  } else {
+    console.log("Could not find ChatGPT send button.");
+  }
+
+  return true;
 }
 
 // --- PDF DOWNLOAD LISTENER (Add to bottom of content_gpt.js) ---
@@ -247,3 +282,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     .catch(err => console.error("PDF Error:", err));
   }
 });
+
+// --- NEW: Instant Paste Listener (No Reload Needed) ---
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === "paste_trigger") {
+        console.log("Hot Swap detected! Pasting immediately...");
+        checkAndPasteGPT(); // Re-use your existing paste function
+    }
+});
+
+// (Keep your existing window.addEventListener code too! 
+// We need BOTH: one for new tabs, one for existing tabs.)
