@@ -2,13 +2,18 @@
 
 ## Performance Optimization (Latency)
 
-Status: Open  
+Status: Done  
 Priority: High
 
 Problem: Short chat transfers (e.g., ~14 lines) take ~1 minute because the extension forces a hard reload of the destination tab and waits for the SPA to re-initialize.
 
-### Solutions
-- [ ] Update `extension/background.js` to avoid force reload when the destination tab is already idle/ready (focus and inject immediately).
+### Completed (Smart Waiter)
+- [x] Hot-swap: switch to existing tab and send `paste_trigger` immediately (no force reload).
+- [x] Robust waits: replace fixed timers with `waitForElement` (poll every 500ms up to 10s).
+- [x] Instant paste: listen for `paste_trigger` in all content scripts.
+- [x] Self-healing: if the input box is missing after 10s, auto-reload once.
+
+### Remaining Ideas
 - [ ] Replace `document.execCommand('insertText')` with `navigator.clipboard.writeText()` for faster input.
 
 ## Rich Content Support (Links & Graphs)

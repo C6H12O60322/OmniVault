@@ -21,47 +21,45 @@ chrome.runtime.onInstalled.addListener(async () => {
 
 // 2. NEW TRAFFIC CONTROLLER: Handles both Gemini AND ChatGPT
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
-  
-  // --- SCENARIO 1: Open GEMINI ---
-  if (request.action === "open_gemini") {
-    const tabs = await chrome.tabs.query({ url: "https://gemini.google.com/*" });
-    
+
+  // Helper function to handle the "Hot Swap" logic
+  async function handleTransfer(targetUrl, targetOrigin) {
+    // 1. Check if tab exists
+    const tabs = await chrome.tabs.query({ url: targetUrl });
+    let activeTab = null;
+
     if (tabs.length > 0) {
-      // Tab exists: Reload it to clear chat, then switch to it
-      await chrome.tabs.update(tabs[0].id, { active: true, url: "https://gemini.google.com/app" });
+      // FAST PATH: Tab exists. Just switch to it. DO NOT RELOAD.
+      activeTab = tabs[0];
+      await chrome.tabs.update(activeTab.id, { active: true });
+      console.log(`Switched to existing tab: ${activeTab.id}`);
     } else {
-      // No tab: Create new one
-      chrome.tabs.create({ url: "https://gemini.google.com/app" });
+      // SLOW PATH: No tab. Must create new one.
+      activeTab = await chrome.tabs.create({ url: targetOrigin });
+      console.log(`Created new tab: ${activeTab.id}`);
+      // If new, we must wait for it to load. The content script's 'window.onload' handles this.
+      return; 
     }
+
+    // 2. If we "Hot Swapped" (didn't reload), trigger paste immediately
+    chrome.tabs.sendMessage(activeTab.id, { action: "paste_trigger" })
+      .catch(err => console.log("Tab wasn't ready for message, user might need to reload once manually."));
   }
 
-  // --- SCENARIO 2: Open CHATGPT (New!) ---
+  // --- ROUTING ---
   if (request.action === "open_chatgpt") {
-    // Check for standard ChatGPT URL
-    const tabs = await chrome.tabs.query({ url: "https://chatgpt.com/*" });
-    
-    if (tabs.length > 0) {
-      // Tab exists: Reload it to get a fresh chat
-      await chrome.tabs.update(tabs[0].id, { active: true, url: "https://chatgpt.com/" });
-    } else {
-      // No tab: Create new one
-      chrome.tabs.create({ url: "https://chatgpt.com/" });
-    }
+    handleTransfer("https://chatgpt.com/*", "https://chatgpt.com/");
+  }
+
+  if (request.action === "open_gemini") {
+    handleTransfer("https://gemini.google.com/*", "https://gemini.google.com/app");
+  }
+
+  if (request.action === "open_claude") {
+    handleTransfer("https://claude.ai/*", "https://claude.ai/new");
   }
   
-  // --- SCENARIO 3: Open CLAUDE (New!) ---
-  if (request.action === "open_claude") {
-    const tabs = await chrome.tabs.query({ url: "https://claude.ai/*" });
-    
-    if (tabs.length > 0) {
-      // Claude is tricky; /new usually forces a reset
-      await chrome.tabs.update(tabs[0].id, { active: true, url: "https://claude.ai/new" });
-    } else {
-      chrome.tabs.create({ url: "https://claude.ai/new" });
-    }
-  }
-
-
+  // (Keep your existing PDF Proxy code below if you have it)
 });
 
 /*
