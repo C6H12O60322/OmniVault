@@ -43,3 +43,6 @@
 - Ran `Get-Content Context.MD` to update the context log.
 - Added `references` with the requested link and a short summary.
 - Ran `git status -sb` to check current changes before committing.
+- Staged all changes with `git add -A`.
+- Committed all current changes with `git commit -m "Update extension and add references"`.
+- Pushed the branch with `git push`.
