@@ -7,7 +7,10 @@
   "host_permissions": [
     "https://chatgpt.com/*",
     "https://gemini.google.com/*",
-    "http://localhost:8000/*"
+    "http://localhost:8000/*",
+    "https://www.perplexity.ai/*",
+    "https://grok.com/*",
+    "https://x.com/*"
   ],
   "background": {
     "service_worker": "background.js"
@@ -24,6 +27,14 @@
     {
       "matches": ["https://claude.ai/*"],  
       "js": ["content_claude.js"]
+    },
+    {
+      "matches": ["https://www.perplexity.ai/*"],
+      "js": ["content_perplexity.js"]
+    },
+    {
+      "matches": ["https://grok.com/*", "https://x.com/i/grok*"],
+      "js": ["content_grok.js"]
     }
   ],
   "action": {
