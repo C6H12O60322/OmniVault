@@ -102,7 +102,7 @@ function pasteToClaude(text) {
   }
 }
 
-// --- NEW: Instant Paste Listener ---
+// --- 01/30/26: Instant Paste Listener ---
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "paste_trigger") {
         console.log("Hot Swap detected! Pasting immediately...");

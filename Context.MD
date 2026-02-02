@@ -25,3 +25,21 @@
 - Re-staged all changes with `git add -A` after updating `Context.MD`.
 - Committed all current changes with `git commit -am "Improve transfer robustness and update TODO"`.
 - Pushed commit to GitHub with `git push`.
+- Committed context log with `git commit -am "Log commit and push in context"`.
+- Pushed that context-log commit with `git push`.
+
+## 2026-02-01
+- Ran `Get-ChildItem -Force` to review repo contents.
+- Ran `Get-Content Context.MD` to read the context log.
+- Learned the server logged a `GET /favicon.ico` 404 while the user was running FastAPI.
+- User asked to leave the favicon 404 as-is if it is harmful.
+- User clarified they meant harmless and that leaving it is fine.
+
+## 2026-02-02
+- Ran `Get-ChildItem -Force` to review repo contents for a references file.
+- Ran `rg -n "reference|references|useful" -S .` to search for a references section.
+- Ran `rg -n "link|links|resources|useful" -S .` to search for link lists.
+- Ran `rg --files -g "*ref*"` to look for reference-named files.
+- Ran `Get-Content Context.MD` to update the context log.
+- Added `references` with the requested link and a short summary.
+- Ran `git status -sb` to check current changes before committing.

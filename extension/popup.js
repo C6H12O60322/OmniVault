@@ -14,7 +14,9 @@ document.getElementById("transferBtn").addEventListener("click", () => {
     let queryUrl = "";
     if (source === "chatgpt") queryUrl = "https://chatgpt.com/*";
     if (source === "gemini") queryUrl = "https://gemini.google.com/*";
-    if (source === "claude") queryUrl = "https://claude.ai/*"; // NEW
+    if (source === "claude") queryUrl = "https://claude.ai/*"; 
+    if (source === "perplexity") queryUrl = "https://www.perplexity.ai/*"; //02/01/26
+    if (source === "grok") queryUrl = "https://grok.com/*";
 
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         // Check if user is actually ON the source website
