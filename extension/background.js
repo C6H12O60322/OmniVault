@@ -23,14 +23,22 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   // --- A. TRAFFIC CONTROLLER (Tab Switching Logic) ---
   
   // Helper function to handle the "Hot Swap" logic
-  async function handleTransfer(targetUrl, targetOrigin) {
+  async function handleTransfer(targetUrl, targetOrigin, forceReload = false) {
     // 1. Check if tab exists
     const tabs = await chrome.tabs.query({ url: targetUrl });
     let activeTab = null;
 
     if (tabs.length > 0) {
-      // FAST PATH: Tab exists. Just switch to it. DO NOT RELOAD.
       activeTab = tabs[0];
+
+      if (forceReload) {
+        // Force a fresh page (new chat) to avoid stale input state.
+        await chrome.tabs.update(activeTab.id, { active: true, url: targetOrigin });
+        console.log(`Reloaded tab for fresh chat: ${activeTab.id}`);
+        return;
+      }
+
+      // FAST PATH: Tab exists. Just switch to it. DO NOT RELOAD.
       await chrome.tabs.update(activeTab.id, { active: true });
       console.log(`Switched to existing tab: ${activeTab.id}`);
     } else {
@@ -49,24 +57,25 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   // --- ROUTING COMMANDS ---
   if (request.action === "open_chatgpt") {
-    handleTransfer("https://chatgpt.com/*", "https://chatgpt.com/");
+    handleTransfer("https://chatgpt.com/*", "https://chatgpt.com/", true);
   }
 
   if (request.action === "open_gemini") {
-    handleTransfer("https://gemini.google.com/*", "https://gemini.google.com/app");
+    handleTransfer("https://gemini.google.com/*", "https://gemini.google.com/app", true);
   }
 
   if (request.action === "open_claude") {
-    handleTransfer("https://claude.ai/*", "https://claude.ai/new");
+    handleTransfer("https://claude.ai/*", "https://claude.ai/new", true);
   }
 
   if (request.action === "open_perplexity") {
-    handleTransfer("https://www.perplexity.ai/*", "https://www.perplexity.ai/");
+    handleTransfer("https://www.perplexity.ai/*", "https://www.perplexity.ai/", true);
   }
 
   if (request.action === "open_grok") {
-    handleTransfer("https://grok.com/*", "https://grok.com/");
+    handleTransfer("https://grok.com/*", "https://grok.com/", true);
   }
+
 
 
   // --- B. MASTER PROXY (Server Talking Logic) ---
@@ -86,11 +95,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           // Save to storage so the next tab can read it
           chrome.storage.local.set({ 'pending_transfer': data.clean_text }, () => {
               // Open the destination tab
-              if (request.destination === "chatgpt") handleTransfer("https://chatgpt.com/*", "https://chatgpt.com/");
-              if (request.destination === "gemini") handleTransfer("https://gemini.google.com/*", "https://gemini.google.com/app");
-              if (request.destination === "claude") handleTransfer("https://claude.ai/*", "https://claude.ai/new");
-              if (request.destination === "perplexity") handleTransfer("https://www.perplexity.ai/*", "https://www.perplexity.ai/");
-              if (request.destination === "grok") handleTransfer("https://grok.com/*", "https://grok.com/");
+              if (request.destination === "chatgpt") handleTransfer("https://chatgpt.com/*", "https://chatgpt.com/", true);
+              if (request.destination === "gemini") handleTransfer("https://gemini.google.com/*", "https://gemini.google.com/app", true);
+              if (request.destination === "claude") handleTransfer("https://claude.ai/*", "https://claude.ai/new", true);
+              if (request.destination === "perplexity") handleTransfer("https://www.perplexity.ai/*", "https://www.perplexity.ai/", true);
+              if (request.destination === "grok") handleTransfer("https://grok.com/*", "https://grok.com/", true);
           });
           sendResponse({ status: "success" });
       })
@@ -125,6 +134,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       return true; // Keep channel open
   }
 });
+
 
 /*
 

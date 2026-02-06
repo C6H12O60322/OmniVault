@@ -65,3 +65,15 @@ Route the download request through the Background Script, which is immune to CSP
   - Reload Extension (crucial for manifest updates).
   - Refresh Claude.ai page.
   - Click "Download PDF" and confirm file saves without console errors.
+
+## Bug Fix: Refresh Source Before Scrape (Unreliable)
+
+Status: Open  
+Priority: High
+
+Problem: Refreshing the source (extracted) website before scraping often results in empty/partial extraction.
+
+### To-Do List
+- [ ] Identify why content scripts sometimes fail to scrape after a reload (timing, hydration, or selector issues).
+- [ ] Prototype a robust refresh → wait-for-ready → scrape flow (including a retry/backoff).
+- [ ] Add optional auto-scroll/expand to capture full history after refresh.

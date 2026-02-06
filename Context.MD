@@ -46,3 +46,23 @@
 - Staged all changes with `git add -A`.
 - Committed all current changes with `git commit -m "Update extension and add references"`.
 - Pushed the branch with `git push`.
+
+## 2026-02-06
+- Ran `Get-ChildItem -Force` to review repo contents.
+- Ran `rg --files` to list tracked files.
+- Read `extension/content_perplexity.js` to inspect the Perplexity scraper/paster.
+- Read `extension/content_grok.js` to inspect the Grok scraper/paster.
+- Read `extension/content_gpt.js`, `extension/content_claude.js`, and `extension/content_gemini.js` to use as references.
+- Read `extension/background.js`, `extension/popup.js`, and `extension/manifest.json` to confirm proxy flow and permissions.
+- Updated `extension/content_perplexity.js` to use the background proxy, strengthen selectors, add load-time paste, and add `waitForElement`.
+- Updated `extension/content_grok.js` to use the background proxy, strengthen selectors, add load-time paste, and add `waitForElement`.
+- Updated `extension/content_gemini.js` to route transfers to Perplexity and Grok.
+- Updated `extension/content_grok.js` with broader selectors and a fallback scraper to improve extraction reliability.
+- Added a one-time refresh-before-paste flow to `extension/content_perplexity.js` and `extension/content_grok.js`.
+- Updated `extension/background.js` to force reload destination tabs to a fresh chat before pasting.
+- Updated `extension/background.js` and `extension/popup.js` to refresh the source tab before scraping and then auto-trigger the scrape after reload.
+- Added a delayed, retrying scrape trigger after source refresh in `extension/background.js` to ensure content scripts are ready before extraction.
+- Added debug logs to `extension/background.js`, `extension/popup.js`, `extension/content_perplexity.js`, and `extension/content_grok.js` to trace refresh, scrape, and message counts.
+- Removed the source refresh-before-scrape flow and restored direct scrape messaging from `extension/popup.js`.
+- Noted that refreshing source (extracted) websites before scrape was unreliable and could prevent extraction; needs a more robust approach.
+- Added a TODO section to track fixing the refresh-before-scrape reliability issue.

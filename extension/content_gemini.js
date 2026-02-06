@@ -64,80 +64,55 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 // (Do not delete the window.addEventListener('load') part!)
 console.log("OmniVault: Gemini Paster Loaded!");
 
+// Since we force-reload the page in background.js, this runs every time now!
 window.addEventListener('load', () => {
-  checkAndPaste();
+  // Give the page a moment to fully initialize
+  setTimeout(checkAndPaste, 1500);
 });
 
 function checkAndPaste() {
   chrome.storage.local.get(['pending_transfer'], (result) => {
     if (result.pending_transfer) {
       console.log("Found data! Pasting and Sending...");
-      pasteAndSend(result.pending_transfer).then((pasted) => {
-        if (pasted) {
-          chrome.storage.local.remove(['pending_transfer']);
-        }
-      });
+      pasteAndSend(result.pending_transfer);
+      
+      // Clear storage
+      chrome.storage.local.remove(['pending_transfer']);
     }
   });
 }
 
-function waitForElement(getElement, intervalMs = 500, timeoutMs = 10000) {
-  return new Promise((resolve) => {
-    const start = Date.now();
-    const timer = setInterval(() => {
-      const element = typeof getElement === "function" ? getElement() : document.querySelector(getElement);
-      if (element) {
-        clearInterval(timer);
-        resolve(element);
-        return;
-      }
-      if (Date.now() - start >= timeoutMs) {
-        clearInterval(timer);
-        resolve(null);
-      }
-    }, intervalMs);
-  });
-}
+function pasteAndSend(text) {
+  const checkForInput = setInterval(() => {
+    // 1. Find the Input Box
+    const inputField = document.querySelector('div[contenteditable="true"]') || 
+                       document.querySelector('.ql-editor');
 
-function handleMissingInputOnce() {
-  const key = "omnivault_self_heal_input_reload";
-  if (!sessionStorage.getItem(key)) {
-    sessionStorage.setItem(key, "true");
-    console.log("Input box missing for 10s. Reloading page once...");
-    window.location.reload();
-    return;
-  }
-  console.log("Input box still missing after a reload.");
-}
+    if (inputField) {
+      clearInterval(checkForInput);
+      
+      // A. Focus and Paste
+      inputField.focus();
+      document.execCommand('insertText', false, text);
+      
+      // B. Wait for the "Send" button to unlock, then click it
+      setTimeout(() => {
+        // Selector for Gemini's Send Button (Look for aria-label or the specific icon class)
+        // Note: This selector looks for the button that sends the message
+        const sendButton = document.querySelector('button[aria-label*="Send"]') || 
+                           document.querySelector('button[aria-label*="傳送"]') || // Traditional Chinese
+                           document.querySelector('.send-button'); // Fallback
 
-async function pasteAndSend(text) {
-  const inputField = await waitForElement(() => {
-    return document.querySelector('div[contenteditable="true"]') ||
-           document.querySelector('.ql-editor');
-  });
-
-  if (!inputField) {
-    handleMissingInputOnce();
-    return false;
-  }
-
-  inputField.focus();
-  document.execCommand('insertText', false, text);
-
-  const sendButton = await waitForElement(() => {
-    return document.querySelector('button[aria-label*="Send"]') ||
-           document.querySelector('button[aria-label*="傳送"]') ||
-           document.querySelector('.send-button');
-  });
-
-  if (sendButton) {
-    console.log("Clicking Send...");
-    sendButton.click();
-  } else {
-    console.log("Could not find send button, you might need to press Enter manually.");
-  }
-
-  return true;
+        if (sendButton) {
+            console.log("Clicking Send...");
+            sendButton.click();
+        } else {
+            console.log("Could not find send button, you might need to press Enter manually.");
+        }
+      }, 500); // Wait 0.5s after pasting
+      
+    }
+  }, 1000);
 }
 
 
@@ -231,7 +206,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
-// --- NEW: Instant Paste Listener ---
+// --- 01/30/26: Instant Paste Listener ---
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "paste_trigger") {
         console.log("Hot Swap detected! Pasting immediately...");
