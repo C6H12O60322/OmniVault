@@ -19,10 +19,7 @@ document.getElementById("transferBtn").addEventListener("click", () => {
     if (source === "grok") queryUrl = "https://grok.com/*";
 
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        // Check if user is actually ON the source website
-        // (Simple check, mostly relies on user being on the right tab)
-        
-        // 2. Tell the Content Script to Scrape
+        // Tell the content script to scrape the current page.
         chrome.tabs.sendMessage(tabs[0].id, { 
             action: "scrape",
             source: source,
